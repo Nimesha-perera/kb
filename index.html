@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 16px;
+        background: #f5f5f5;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+      }
+
+      .keyboard-container {
+        background: #e5e5e5;
+        padding: 8px;
+        border-radius: 12px;
+        margin: 16px 0;
+      }
+
+      .keyboard {
+        display: grid;
+        gap: 6px;
+      }
+
+      .keyboard-row {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .row-1 {
+        grid-template-columns: repeat(10, 1fr);
+      }
+
+      .row-2 {
+        padding: 0 5%;
+        grid-template-columns: repeat(9, 1fr);
+      }
+
+      .row-3 {
+        padding: 0 10%;
+        grid-template-columns: repeat(8, 1fr);
+      }
+
+      .key {
+        position: relative;
+        aspect-ratio: 1;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+      }
+
+      .key:active {
+        background: #f0f0f0;
+        transform: translateY(1px);
+      }
+
+      .english-letter {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        font-size: 10px;
+        color: #666;
+      }
+
+      .symbol {
+        font-size: 18px;
+      }
+
+      .space-bar {
+        grid-column: span 8;
+        aspect-ratio: unset !important;
+        height: 40px;
+        background: white;
+      }
+
+      .delete-key {
+        background: #fee2e2;
+      }
+
+      .delete-key:active {
+        background: #fecaca;
+      }
+
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin: 10px 0;
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        resize: none;
+        background: white;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin: 10px 0;
+      }
+
+      button {
+        padding: 12px 20px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        touch-action: manipulation;
+      }
+
+      button:active {
+        background: #1d4ed8;
+        transform: translateY(1px);
+      }
+
+      .section {
+        background: white;
+        margin: 16px 0;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        display: none;
+        animation: fadeIn 0.3s, fadeOut 0.3s 2s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 20px);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        to {
+          opacity: 0;
+          transform: translate(-50%, 20px);
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 12px;
+        }
+
+        .section {
+          padding: 12px;
+          margin: 12px 0;
+        }
+
+        .button-group {
+          flex-direction: column;
+        }
+
+        button {
+          max-width: none;
+          width: 100%;
+        }
+
+        .key {
+          min-width: 0;
+        }
+
+        .english-letter {
+          font-size: 8px;
+        }
+
+        .symbol {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Secret Symbol Keyboard</h1>
+
+    <div class="section">
+      <h2>Type Message</h2>
+      <textarea
+        id="secretMessage"
+        placeholder="Your secret message will appear here..."
+        readonly
+      ></textarea>
+      <div class="button-group">
+        <button onclick="copyText()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+          Copy Message
+        </button>
+        <button onclick="clearText()">Clear</button>
+      </div>
+      <div class="keyboard-container">
+        <div id="keyboard"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Translate Message</h2>
+      <textarea
+        id="translationInput"
+        placeholder="Paste secret message here to translate..."
+      ></textarea>
+      <div class="button-group">
+        <button onclick="pasteText()">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+            ></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Paste
+        </button>
+        <button onclick="translateText()">Translate</button>
+      </div>
+      <textarea
+        id="translationOutput"
+        placeholder="Translation will appear here..."
+        readonly
+      ></textarea>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      const symbolMap = {
+        A: "❋",
+        B: "◈",
+        C: "❆",
+        D: "◐",
+        E: "❉",
+        F: "◑",
+        G: "❀",
+        H: "◒",
+        I: "✿",
+        J: "◓",
+        K: "❁",
+        L: "◔",
+        M: "✾",
+        N: "◕",
+        O: "❃",
+        P: "⬖",
+        Q: "❇",
+        R: "⬗",
+        S: "❈",
+        T: "⬘",
+        U: "✤",
+        V: "⬙",
+        W: "✣",
+        X: "⬚",
+        Y: "✥",
+        Z: "⬔",
+      };
+
+      // Mobile keyboard layout
+      const layout = [
+        "QWERTYUIOP", // Row 1
+        "ASDFGHJKL", // Row 2
+        "ZXCVBNM", // Row 3
+      ];
+
+      // Create keyboard with rows
+      const keyboard = document.getElementById("keyboard");
+
+      // Create first two rows
+      layout.slice(0, 2).forEach((row, index) => {
+        const rowDiv = document.createElement("div");
+        rowDiv.className = `keyboard-row row-${index + 1}`;
+
+        [...row].forEach((letter) => {
+          const key = document.createElement("div");
+          key.className = "key";
+          key.innerHTML = `
+          <span class="english-letter">${letter}</span>
+          <span class="symbol">${symbolMap[letter]}</span>
+        `;
+          key.onclick = () => typeSymbol(symbolMap[letter]);
+          rowDiv.appendChild(key);
+        });
+
+        keyboard.appendChild(rowDiv);
+      });
+
+      // Create third row with delete key
+      const thirdRow = document.createElement("div");
+      thirdRow.className = "keyboard-row row-3";
+
+      // Add letters for third row
+      [...layout[2]].forEach((letter) => {
+        const key = document.createElement("div");
+        key.className = "key";
+        key.innerHTML = `
+        <span class="english-letter">${letter}</span>
+        <span class="symbol">${symbolMap[letter]}</span>
+      `;
+        key.onclick = () => typeSymbol(symbolMap[letter]);
+        thirdRow.appendChild(key);
+      });
+
+      // Add delete key to third row
+      const deleteKey = document.createElement("div");
+      deleteKey.className = "key delete-key";
+      deleteKey.innerHTML = '<span class="symbol">⌫</span>';
+      deleteKey.onclick = deleteLastChar;
+      thirdRow.appendChild(deleteKey);
+
+      keyboard.appendChild(thirdRow);
+
+      // Add final row with space
+      const finalRow = document.createElement("div");
+      finalRow.className = "keyboard-row";
+
+      const spaceBar = document.createElement("div");
+      spaceBar.className = "key space-bar";
+      spaceBar.innerHTML = '<span class="symbol">Space</span>';
+      spaceBar.onclick = () => typeSymbol(" ");
+
+      finalRow.appendChild(spaceBar);
+      keyboard.appendChild(finalRow);
+
+      function typeSymbol(symbol) {
+        const textarea = document.getElementById("secretMessage");
+        textarea.value += symbol;
+      }
+
+      function deleteLastChar() {
+        const textarea = document.getElementById("secretMessage");
+        textarea.value = textarea.value.slice(0, -1);
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.display = "block";
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, 2300);
+      }
+
+      function copyText() {
+        const textarea = document.getElementById("secretMessage");
+        textarea.select();
+        document.execCommand("copy");
+        showToast("Message copied to clipboard!");
+      }
+
+      async function pasteText() {
+        try {
+          const text = await navigator.clipboard.readText();
+          document.getElementById("translationInput").value = text;
+        } catch (err) {
+          showToast("Failed to paste. Please paste manually.");
+        }
+      }
+
+      function clearText() {
+        document.getElementById("secretMessage").value = "";
+      }
+
+      const reverseSymbolMap = Object.fromEntries(
+        Object.entries(symbolMap).map(([k, v]) => [v, k])
+      );
+
+      function translateText() {
+        const input = document.getElementById("translationInput").value;
+        let translated = "";
+
+        [...input].forEach((char) => {
+          translated += reverseSymbolMap[char] || char;
+        });
+
+        document.getElementById("translationOutput").value = translated;
+      }
+    </script>
+  </body>
+</html>
